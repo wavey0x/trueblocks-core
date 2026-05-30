@@ -104,9 +104,9 @@ func (opts *BlocksOptions) validateBlocks() error {
 		}
 
 		if opts.Traces {
-			err, ok := opts.Conn.IsNodeTracing()
-			if !ok {
-				return validate.Usage("{0} requires tracing, err: {1}", "chifra blocks --traces", err.Error())
+			tracingCheck := opts.Conn.CheckNodeTracing()
+			if !tracingCheck.OK {
+				return validate.Usage("{0} requires tracing. Tracing probe failed: {1}", "chifra blocks --traces", tracingCheck.Diagnostic())
 			}
 		}
 

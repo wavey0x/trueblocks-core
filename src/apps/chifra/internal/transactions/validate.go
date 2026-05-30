@@ -59,9 +59,9 @@ func (opts *TransactionsOptions) validateTransactions() error {
 		}
 
 		if opts.Traces {
-			err, ok := opts.Conn.IsNodeTracing()
-			if !ok {
-				return validate.Usage("{0} requires tracing, err: {1}", "chifra export --traces", err.Error())
+			tracingCheck := opts.Conn.CheckNodeTracing()
+			if !tracingCheck.OK {
+				return validate.Usage("{0} requires tracing. Tracing probe failed: {1}", "chifra transactions --traces", tracingCheck.Diagnostic())
 			}
 			if opts.Uniq {
 				return validate.Usage("The {0} option is not available{1}.", "--uniq", " with the --traces option")

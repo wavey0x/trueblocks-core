@@ -50,9 +50,9 @@ func (opts *ExportOptions) validateExport() error {
 	}
 
 	if opts.Traces {
-		err, ok := opts.Conn.IsNodeTracing()
-		if !ok {
-			return validate.Usage("{0} requires tracing, err: {1}", "chifra export --traces", err.Error())
+		tracingCheck := opts.Conn.CheckNodeTracing()
+		if !tracingCheck.OK {
+			return validate.Usage("{0} requires tracing. Tracing probe failed: {1}", "chifra export --traces", tracingCheck.Diagnostic())
 		}
 	}
 
@@ -165,8 +165,9 @@ func (opts *ExportOptions) validateExport() error {
 			return validate.Usage("The {0} options allow only a single address.", "accounting")
 		}
 
-		if !opts.Conn.IsNodeArchive() {
-			return validate.Usage("The {0} options requires {1}.", "accounting", "an archive node")
+		archiveCheck := opts.Conn.CheckNodeArchive()
+		if !archiveCheck.OK {
+			return validate.Usage("The {0} options requires {1}. Archive probe failed: {2}", "accounting", "an archive node", archiveCheck.Diagnostic())
 		}
 
 		if opts.Globals.Chain != "mainnet" {

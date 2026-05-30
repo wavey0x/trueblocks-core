@@ -138,8 +138,11 @@ func (opts *StateOptions) validateState() error {
 		}
 
 		latest := opts.Conn.GetLatestBlockNumber()
-		if bounds.First < (latest-250) && !opts.Conn.IsNodeArchive() {
-			return validate.Usage("The {0} requires {1}.", "query for historical state", "an archive node")
+		if bounds.First < (latest - 250) {
+			archiveCheck := opts.Conn.CheckNodeArchive()
+			if !archiveCheck.OK {
+				return validate.Usage("The {0} requires {1}. Archive probe failed: {2}", "query for historical state", "an archive node", archiveCheck.Diagnostic())
+			}
 		}
 	}
 

@@ -31,9 +31,9 @@ func (opts *TracesOptions) validateTraces() error {
 			return validate.Usage("Please supply one or more transaction identifiers or filters.")
 		}
 
-		err, ok := opts.Conn.IsNodeTracing()
-		if !ok {
-			return validate.Usage("{0} requires tracing, err: {1}", "chifra traces", err.Error())
+		tracingCheck := opts.Conn.CheckNodeTracing()
+		if !tracingCheck.OK {
+			return validate.Usage("{0} requires tracing. Tracing probe failed: {1}", "chifra traces", tracingCheck.Diagnostic())
 		}
 
 		if !validate.HasArticulationKey(opts.Articulate) {

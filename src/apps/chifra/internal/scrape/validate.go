@@ -46,13 +46,14 @@ func (opts *ScrapeOptions) validateScrape() error {
 		logger.Warn(msg)
 	}
 
-	err, ok := opts.Conn.IsNodeTracing()
-	if !ok {
-		return validate.Usage("{0} requires {1}, try {2} instead. Error: {3}", "chifra scrape", "tracing", "chifra init", err.Error())
+	tracingCheck := opts.Conn.CheckNodeTracing()
+	if !tracingCheck.OK {
+		return validate.Usage("{0} requires {1}. Tracing probe failed: {2}", "chifra scrape", "tracing", tracingCheck.Diagnostic())
 	}
 
-	if !opts.Conn.IsNodeArchive() {
-		return validate.Usage("{0} requires {1}, try {2} instead.", "chifra scrape", "an archive node", "chifra init")
+	archiveCheck := opts.Conn.CheckNodeArchive()
+	if !archiveCheck.OK {
+		return validate.Usage("{0} requires {1}. Archive probe failed: {2}", "chifra scrape", "an archive node", archiveCheck.Diagnostic())
 	}
 
 	if opts.Globals.IsApiMode() {
