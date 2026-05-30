@@ -24,12 +24,15 @@ import (
 // EXISTING_CODE
 
 type Status struct {
+	ArchiveError  string      `json:"archiveError,omitempty"`
+	ArchiveProbe  string      `json:"archiveProbe,omitempty"`
 	CachePath     string      `json:"cachePath,omitempty"`
 	Caches        []CacheItem `json:"caches"`
 	Chain         string      `json:"chain,omitempty"`
 	ChainConfig   string      `json:"chainConfig,omitempty"`
 	ChainId       string      `json:"chainId,omitempty"`
 	Chains        []Chain     `json:"chains"`
+	ClientKind    string      `json:"clientKind,omitempty"`
 	ClientVersion string      `json:"clientVersion,omitempty"`
 	HasEsKey      bool        `json:"hasEsKey,omitempty"`
 	HasPinKey     bool        `json:"hasPinKey,omitempty"`
@@ -43,6 +46,8 @@ type Status struct {
 	Progress      string      `json:"progress,omitempty"`
 	RootConfig    string      `json:"rootConfig,omitempty"`
 	RpcProvider   string      `json:"rpcProvider,omitempty"`
+	TracingError  string      `json:"tracingError,omitempty"`
+	TracingProbe  string      `json:"tracingProbe,omitempty"`
 	Version       string      `json:"version,omitempty"`
 	// EXISTING_CODE
 	Meta  *MetaData `json:"meta,omitempty"`
@@ -65,8 +70,11 @@ func (s *Status) Model(chain, format string, verbose bool, extraOpts map[string]
 
 	// EXISTING_CODE
 	model = map[string]any{
+		"archiveError":      s.ArchiveError,
+		"archiveProbe":      s.ArchiveProbe,
 		"cachePath":         s.CachePath,
 		"chainConfig":       s.ChainConfig,
+		"clientKind":        s.ClientKind,
 		"clientVersion":     s.ClientVersion,
 		"hasEsKey":          s.HasEsKey,
 		"hasPinKey":         s.HasPinKey,
@@ -77,11 +85,16 @@ func (s *Status) Model(chain, format string, verbose bool, extraOpts map[string]
 		"isTracing":         s.IsTracing,
 		"rootConfig":        s.RootConfig,
 		"rpcProvider":       s.RpcProvider,
+		"tracingError":      s.TracingError,
+		"tracingProbe":      s.TracingProbe,
 		"trueblocksVersion": s.Version,
 	}
 	order = []string{
+		"archiveError",
+		"archiveProbe",
 		"cachePath",
 		"chainConfig",
+		"clientKind",
 		"clientVersion",
 		"hasEsKey",
 		"hasPinKey",
@@ -92,6 +105,8 @@ func (s *Status) Model(chain, format string, verbose bool, extraOpts map[string]
 		"isTracing",
 		"rootConfig",
 		"rpcProvider",
+		"tracingError",
+		"tracingProbe",
 		"trueblocksVersion",
 	}
 

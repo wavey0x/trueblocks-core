@@ -154,7 +154,7 @@ func (conn *Connection) CheckNodeTracing() CapabilityCheck {
 		Method: "trace_block",
 		Block:  firstTrace,
 	}
-	_, err := query.Query[[]types.Trace](
+	traces, err := query.Query[[]types.Trace](
 		conn.Chain,
 		check.Method,
 		query.Params{fmt.Sprintf("0x%x", firstTrace)},
@@ -162,6 +162,11 @@ func (conn *Connection) CheckNodeTracing() CapabilityCheck {
 	if err != nil {
 		check.Detail = fmt.Sprintf("%s at block %d failed", check.Method, firstTrace)
 		check.Err = err
+		return check
+	}
+	if traces == nil || *traces == nil {
+		check.Detail = fmt.Sprintf("%s at block %d returned no trace array", check.Method, firstTrace)
+		check.Err = errors.New("missing trace_block result")
 		return check
 	}
 

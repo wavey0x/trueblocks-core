@@ -51,6 +51,21 @@ func TestLoadPrefundsCorruptCSVReturnsDiagnostic(t *testing.T) {
 	}
 }
 
+func TestLoadPrefundsRejectsEnsNames(t *testing.T) {
+	thePath := filepath.Join(t.TempDir(), "allocs.csv")
+	if err := os.WriteFile(thePath, []byte("address,balance\nalice.eth,100\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := LoadPrefunds("mainnet", thePath, nil)
+	if err == nil {
+		t.Fatal("expected ENS prefund address to fail")
+	}
+	if !strings.Contains(err.Error(), "invalid prefund address") {
+		t.Fatalf("expected invalid address diagnostic, got: %v", err)
+	}
+}
+
 func TestGetLargestPrefund(t *testing.T) {
 	thePath := filepath.Join(t.TempDir(), "allocs.csv")
 	csv := strings.Join([]string{

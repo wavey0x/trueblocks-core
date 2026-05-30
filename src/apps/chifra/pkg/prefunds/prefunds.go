@@ -39,7 +39,7 @@ func LoadPrefunds(chain string, thePath string, userCallback allocCallback) ([]A
 	row := 1 // header is row 1
 	callbackFunc := func(record allocationRecord) error {
 		row++
-		if ok, err := base.IsValidAddressE(record.Address); !ok {
+		if ok, err := base.ValidHex(record.Address, 20); !ok {
 			if err != nil {
 				return fmt.Errorf("invalid prefund address at row %d: %w", row, err)
 			}

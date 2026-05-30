@@ -96,6 +96,28 @@ func TestCheckNodeArchiveMainnetFallbackEmptyAllocs(t *testing.T) {
 	}
 }
 
+func TestCheckNodeArchiveMainnetFallbackCorruptAllocsKeepsDiagnostic(t *testing.T) {
+	ts := newRPCServer(t, func(req rpcTestRequest) (any, *rpcTestError) {
+		requireJSONParam(t, req.Params, 0, mainnetArchiveProbeAddress)
+		requireJSONParam(t, req.Params, 1, "0x0")
+		return mainnetArchiveProbeBalance, nil
+	})
+	defer ts.Close()
+
+	conn, root := configuredTestConnection(t, ts.URL)
+	writeAllocs(t, root, "address,balance\nalice.eth,100\n")
+
+	check := conn.CheckNodeArchive()
+	if !check.OK {
+		t.Fatalf("archive check failed: %s", check.Diagnostic())
+	}
+	for _, want := range []string{"built-in mainnet genesis prefund probe", "invalid prefund address"} {
+		if !strings.Contains(check.Detail, want) {
+			t.Fatalf("expected detail to contain %q, got: %s", want, check.Detail)
+		}
+	}
+}
+
 func TestCheckNodeArchiveUsesValidLargestPrefund(t *testing.T) {
 	const largestAddress = "0x2222222222222222222222222222222222222222"
 	ts := newRPCServer(t, func(req rpcTestRequest) (any, *rpcTestError) {
@@ -185,6 +207,40 @@ func TestCheckNodeTracingSuccess(t *testing.T) {
 	}
 }
 
+func TestCheckNodeTracingNullResult(t *testing.T) {
+	ts := newRPCServer(t, func(req rpcTestRequest) (any, *rpcTestError) {
+		return nil, nil
+	})
+	defer ts.Close()
+
+	conn, _ := configuredTestConnection(t, ts.URL)
+	check := conn.CheckNodeTracing()
+	if check.OK {
+		t.Fatal("expected tracing check to fail")
+	}
+	for _, want := range []string{"trace_block", "block 1", "returned no trace array"} {
+		if !strings.Contains(check.Diagnostic(), want) {
+			t.Fatalf("expected diagnostic to contain %q, got: %s", want, check.Diagnostic())
+		}
+	}
+}
+
+func TestCheckNodeTracingMissingResult(t *testing.T) {
+	ts := newRPCServerMissingResult(t)
+	defer ts.Close()
+
+	conn, _ := configuredTestConnection(t, ts.URL)
+	check := conn.CheckNodeTracing()
+	if check.OK {
+		t.Fatal("expected tracing check to fail")
+	}
+	for _, want := range []string{"trace_block", "block 1", "returned no trace array"} {
+		if !strings.Contains(check.Diagnostic(), want) {
+			t.Fatalf("expected diagnostic to contain %q, got: %s", want, check.Diagnostic())
+		}
+	}
+}
+
 func TestCheckNodeTracingMissingNamespace(t *testing.T) {
 	ts := newRPCServer(t, func(req rpcTestRequest) (any, *rpcTestError) {
 		return nil, &rpcTestError{Code: -32601, Message: "method trace_block not found"}
@@ -239,6 +295,24 @@ func newRPCServer(t *testing.T, handler func(rpcTestRequest) (any, *rpcTestError
 			response["error"] = rpcErr
 		} else {
 			response["result"] = result
+		}
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			t.Fatal(err)
+		}
+	}))
+}
+
+func newRPCServerMissingResult(t *testing.T) *httptest.Server {
+	t.Helper()
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var req rpcTestRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Fatal(err)
+		}
+		w.Header().Set("content-type", "application/json")
+		response := map[string]any{
+			"jsonrpc": "2.0",
+			"id":      req.ID,
 		}
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatal(err)
