@@ -1,3 +1,9 @@
+# Migrations
+
+There was a near complete re-write of the entire repo between version 5.9.3 and 6.0.0. The repo version as of this document is v6.4.5. These instructions help you migrate to the new format.
+
+**Don't want to migrate?** See [Not Migrating](#not-migrating) for how to stay on the older versions.
+
 ## Reth-compatible v6.7 deployment
 
 The `codex/reth-v6` branch pins `chifra` to the matching revision in
@@ -8,14 +14,9 @@ updating other submodules is not required to build the Chifra executable.
 
 The pinned fork retains archive/state diagnostics and RPC batch correctness,
 accepts nullable reward hashes, hardens chunk downloads and monitor refresh,
-and fixes multi-address count/bounds pagination. See its README for provenance,
-validation, and rollback requirements. Existing indexes remain in place.
-
-# Migrations
-
-There was a near complete re-write of the entire repo between version 5.9.3 and 6.0.0. The repo version as of this document is v6.4.5. These instructions help you migrate to the new format.
-
-**Don't want to migrate?** See [Not Migrating](#not-migrating) for how to stay on the older versions.
+fixes multi-address count/bounds pagination (including monitors
+written out of block order), and tolerates reverted optional token calls.
+See its README for provenance, validation, and rollback requirements. Existing indexes remain in place.
 
 ## How to migrate to v6.4.5
 
