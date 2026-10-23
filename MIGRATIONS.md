@@ -1,3 +1,16 @@
+## Reth-compatible v6.7 deployment
+
+The `codex/reth-v6` branch pins `chifra` to the matching revision in
+[wavey0x/trueblocks-chifra](https://github.com/wavey0x/trueblocks-chifra/tree/codex/reth-v6).
+Clone with submodules, or run `git submodule sync chifra` followed by
+`git submodule update --init chifra`. The gitlink records the exact source;
+updating other submodules is not required to build the Chifra executable.
+
+The pinned fork retains archive/state diagnostics and RPC batch correctness,
+accepts nullable reward hashes, hardens chunk downloads and monitor refresh,
+and fixes multi-address count/bounds pagination. See its README for provenance,
+validation, and rollback requirements. Existing indexes remain in place.
+
 # Migrations
 
 There was a near complete re-write of the entire repo between version 5.9.3 and 6.0.0. The repo version as of this document is v6.4.5. These instructions help you migrate to the new format.
